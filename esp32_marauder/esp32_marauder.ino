@@ -357,8 +357,10 @@ void setup()
     settings_obj.createDefaultSettings(SPIFFS);
   }
 
+  // Local patch: -DMARAUDER_NO_SD skips SD init on boards with no SD hardware,
+  // where SD.begin() asserts at boot.
   #ifndef HAS_SIMPLEX_DISPLAY
-    #if defined(HAS_SD)
+    #if defined(HAS_SD) && !defined(MARAUDER_NO_SD)
       // Do some SD stuff
       if(!sd_obj.initSD())
         Serial.println(F("SD Card NOT Supported"));
@@ -393,7 +395,9 @@ void setup()
     led_obj.RunSetup();
   #endif
 
-  #ifdef HAS_GPS
+  // Local patch: -DMARAUDER_NO_GPS skips GPS init; on C5 the GPS UART pins
+  // (GPIO13/14) are the native USB D-/D+ pins, so begin() kills the USB port.
+  #if defined(HAS_GPS) && !defined(MARAUDER_NO_GPS)
     gps_obj.begin();
   #endif
 
@@ -463,7 +467,7 @@ void loop()
     t_dongle_display.update(currentTime, wifi_scan_obj);
   #endif
 
-  #ifdef HAS_GPS
+  #if defined(HAS_GPS) && !defined(MARAUDER_NO_GPS)
     gps_obj.main();
   #endif
 
