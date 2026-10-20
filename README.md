@@ -4,6 +4,23 @@
 <!---Shields/Badges https://shields.io/--->
 
 # ESP32 Marauder
+
+## Fork notes (va1kar1e)
+This fork adds two opt-in build flags for bare ESP32-C5 boards (e.g. an ESP32-C5-MINI-1
+module with no SD card and no GPS wired up) that otherwise crash or lose their USB port
+at boot when built with `MARAUDER_C5`:
+
+- `-DMARAUDER_NO_SD` — skips `SD.begin()` in `setup()`. Without it, boards with no SD
+  controller on the bus hit `assert failed: xQueueSemaphoreTake` and reboot-loop.
+- `-DMARAUDER_NO_GPS` — skips `gps_obj.begin()`/`gps_obj.main()`. On ESP32-C5 the GPS
+  UART pins (GPIO13/14) are the chip's native USB D-/D+ pins, so initializing GPS there
+  kills the USB-Serial/JTAG port used to flash and talk to the board.
+
+Both flags default to off, so existing board configs are unaffected. See the
+[`feature/c5-no-sd-no-gps-option`](https://github.com/va1kar1e/ESP32Marauder/tree/feature/c5-no-sd-no-gps-option)
+branch for the change. Built and flash-tested on a real ESP32-C5HF4 (4MB flash, no PSRAM)
+board with a PlatformIO environment targeting `esp32-c5-devkitc1-n4`, PSRAM disabled.
+
 <p align="center"><img alt="Marauder logo" src="https://github.com/justcallmekoko/ESP32Marauder/blob/master/pictures/marauder_skull_patch_04_full_final.png?raw=true" width="300"></p>
 <p align="center">
   <b>A suite of WiFi/Bluetooth offensive and defensive tools for the ESP32</b>
